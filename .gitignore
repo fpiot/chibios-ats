@@ -1,0 +1,3 @@
+.dep/
+build/
+demos/*-ats/main.c

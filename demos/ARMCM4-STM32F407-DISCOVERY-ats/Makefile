@@ -150,17 +150,21 @@ SZ   = $(TRGT)size
 HEX  = $(CP) -O ihex
 BIN  = $(CP) -O binary
 
+ATS       = patsopt
+ATSNOWARN = -Wno-unused-label -Wno-unused-but-set-variable -Wno-implicit-function-declaration -Wno-unused-parameter -Wno-char-subscripts
+ATSCFLAGS = -std=gnu99 -D_XOPEN_SOURCE  -I. -I${PATSHOME} -I${PATSHOME}/ccomp/runtime
+
 # ARM-specific options here
 AOPT =
 
 # THUMB-specific options here
-TOPT = -mthumb -DTHUMB
+TOPT = -mthumb -DTHUMB $(ATSCFLAGS)
 
 # Define C warning options here
-CWARN = -Wall -Wextra -Wstrict-prototypes
+CWARN = -Wall $(ATSNOWARN)
 
 # Define C++ warning options here
-CPPWARN = -Wall -Wextra
+CPPWARN = -Wall
 
 #
 # Compiler settings
@@ -214,3 +218,6 @@ ULIBS =
 
 RULESPATH = $(CHIBIOS)/os/ports/GCC/ARMCMx
 include $(RULESPATH)/rules.mk
+
+main.c: main.dats
+	$(ATS) -o $@ -d $<
