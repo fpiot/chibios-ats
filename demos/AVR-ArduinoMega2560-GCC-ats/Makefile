@@ -41,7 +41,7 @@
 
 
 # MCU name
-MCU = atmega1280
+MCU = atmega2560
 
 
 # Processor frequency.
@@ -167,6 +167,11 @@ CFLAGS += -Wstrict-prototypes
 CFLAGS += -Wa,-adhlns=$(<:%.c=$(OBJDIR)/%.lst)
 CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 CFLAGS += $(CSTANDARD)
+
+# ATS
+ATS       = patsopt
+CFLAGS += -Wno-unused-label -Wno-unused-but-set-variable -Wno-implicit-function-declaration -Wno-unused-parameter -Wno-char-subscripts
+CFLAGS += -D_XOPEN_SOURCE  -I. -I${PATSHOME} -I${PATSHOME}/ccomp/runtime
 
 
 #---------------- Compiler Options C++ ----------------
@@ -353,7 +358,6 @@ REMOVE = rm -f
 REMOVEDIR = rm -rf
 COPY = cp
 WINSHELL = cmd
-
 
 # Define Messages
 # English
@@ -613,6 +617,8 @@ clean_list :
 	$(REMOVE) $(SRC:.c=.d)
 	$(REMOVE) $(SRC:.c=.i)
 	$(REMOVEDIR) .dep
+	$(REMOVE) pats_ccomp_typedefs.h
+	$(REMOVE) main.c
 
 
 # Create object files directory
@@ -628,3 +634,8 @@ $(shell mkdir $(OBJDIR) 2>/dev/null)
 build elf hex bin eep lss sym coff extcoff \
 clean clean_list program debug gdb-config
 
+pats_ccomp_typedefs.h:
+	sed -e 's/_\[0XFFFF\]/_\[0X00FF\]/g' ${PATSHOME}/ccomp/runtime/$@ > $@
+
+main.c: main.dats pats_ccomp_typedefs.h
+	$(ATS) -o $@ -d $<
