@@ -147,6 +147,7 @@ CP   = $(TRGT)objcopy
 AS   = $(TRGT)gcc -x assembler-with-cpp
 OD   = $(TRGT)objdump
 SZ   = $(TRGT)size
+GDB  = $(TRGT)gdb
 HEX  = $(CP) -O ihex
 BIN  = $(CP) -O binary
 
@@ -221,3 +222,9 @@ include $(RULESPATH)/rules.mk
 
 main.c: main.dats
 	$(ATS) -o $@ -d $<
+
+gdbwrite: all
+	@echo '################################################'
+	@echo '##### Use me after running "sudo st-util". #####'
+	@echo '################################################'
+	$(GDB) -x gdbwrite.boot build/$(PROJECT).elf
