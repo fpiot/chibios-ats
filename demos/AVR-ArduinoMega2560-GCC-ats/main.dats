@@ -18,13 +18,11 @@ void c_toggle_led1(void) {
 }
 
 static WORKING_AREA(waThread1, 32);
-static msg_t Thread1(void *arg) {
-	return thread1_ats();
-}
 
+msg_t thread1_ats(void *);
 void c_entry(void) {
 	/* Starts the LED blinker thread. */
-	chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
+	chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, thread1_ats, NULL);
 }
 %}
 
