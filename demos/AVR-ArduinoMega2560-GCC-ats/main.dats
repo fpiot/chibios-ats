@@ -43,18 +43,20 @@ extern fun chThdSleepMilliseconds (ms: uint): void = "mac#"
 extern fun c_entry (): void = "mac#"
 
 extern fun thread1 (arg: ptr): int = "ext#thread1_ats"
-implement thread1 (arg) = begin
-  loop ();
-  0;
-end where {
-  fun loop () = begin
-    c_toggle_led1 ();
-    chThdSleepMilliseconds THREAD_SLEEP_MS;
-    loop ();
-  end
+implement thread1 (arg) = 0 where {
+  fun loop () = {
+    val () = c_toggle_led1 ()
+    val () = chThdSleepMilliseconds THREAD_SLEEP_MS
+    val () = loop ()
+  }
+  val () = loop ()
 }
 
-implement main0 () = begin
+implement main0 () = {
+  fun loop () = {
+    val () = chThdSleepMilliseconds THREAD_SLEEP_MS
+    val () = loop ()
+  }
   (*
    * System initializations.
    * - HAL initialization, this also initializes the configured device drivers
@@ -62,17 +64,12 @@ implement main0 () = begin
    * - Kernel initialization, the main() function becomes a thread and the
    *   RTOS is active.
    *)
-  halInit ();
-  chSysInit ();
+  val () = halInit ()
+  val () = chSysInit ()
   (* Activates the serial driver 1 using the driver default configuration. *)
-  sdStart (SD1_PTR, the_null_ptr);
-  c_clear_led1 ();
-  c_entry (); // xxx Should be snatched...
-  TestThread SD1_PTR;
-  loop ();
-end where {
-  fun loop () = begin
-    chThdSleepMilliseconds THREAD_SLEEP_MS;
-    loop ();
-  end
+  val () = sdStart (SD1_PTR, the_null_ptr)
+  val () = c_clear_led1 ()
+  val () = c_entry () // xxx Should be snatched...
+  val () = TestThread SD1_PTR
+  val () = loop ()
 }
