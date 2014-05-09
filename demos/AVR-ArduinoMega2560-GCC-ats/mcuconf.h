@@ -25,6 +25,7 @@
 /*
  * ADC driver system settings.
  */
+#define AVR_ADC_USE_ADC1            TRUE
 
 /*
  * CAN driver system settings.
@@ -37,6 +38,8 @@
 /*
  * PWM driver system settings.
  */
+#define USE_AVR_PWM1                TRUE
+#define USE_AVR_PWM2                TRUE
 
 /*
  * SERIAL driver system settings.
@@ -47,3 +50,5 @@
 /*
  * SPI driver system settings.
  */
+#define USE_AVR_SPI1                TRUE
+#define USE_AVR_SPI2                FALSE

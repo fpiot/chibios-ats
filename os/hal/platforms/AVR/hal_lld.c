@@ -1,17 +1,21 @@
 /*
-    ChibiOS/RT - Copyright (C) 2006-2013 Giovanni Di Sirio
+    ChibiOS/RT - Copyright (C) 2006,2007,2008,2009,2010,
+                 2011,2012 Giovanni Di Sirio.
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+    This file is part of ChibiOS/RT.
 
-        http://www.apache.org/licenses/LICENSE-2.0
+    ChibiOS/RT is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+    ChibiOS/RT is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
@@ -25,18 +29,29 @@
 #include "ch.h"
 #include "hal.h"
 
+#include "atmega_timers.h"
 /*===========================================================================*/
 /* Driver exported variables.                                                */
 /*===========================================================================*/
 
 /*===========================================================================*/
-/* Driver local variables and types.                                         */
+/* Driver local variables.                                                   */
 /*===========================================================================*/
 
 /*===========================================================================*/
 /* Driver local functions.                                                   */
 /*===========================================================================*/
 
+
+static void setClock()
+{
+  
+  uint8_t prescaler_index = findBestPrescaler(CH_FREQUENCY,ratio_base,clock_source_base,PRESCALER_SIZE_BASE);
+  
+  TCCR0B &= ~((1 << CS02)  | (1 << CS01)  | (1 << CS00));
+  TCCR0B |=((clock_source_base[prescaler_index] & 0x07)<<CS00);
+  OCR0A   = F_CPU / ratio_base[prescaler_index] /CH_FREQUENCY - 1;
+}
 /*===========================================================================*/
 /* Driver interrupt handlers.                                                */
 /*===========================================================================*/
@@ -51,7 +66,27 @@
  * @notapi
  */
 void hal_lld_init(void) {
+     /*
+   * External interrupts setup, all disabled initially.
+   */
+  EICRA  = 0x00;
+#ifdef EICRB
+  EICRB  = 0x00;
+#endif
+  EIMSK  = 0x00;
 
+  /*
+   * Timer 0 setup.
+   */
+  TCCR0A  = (1 << WGM01) | (0 << WGM00) |                /* CTC mode.        */
+            (0 << COM0A1) | (0 << COM0A0) |              /* OC0A disabled.   */
+            (0 << COM0B1) | (0 << COM0B0);               /* OC0B disabled.   */
+  TCCR0B  = (0 << WGM02) ;				 /* CTC mode.        */
+             setClock();  			 
+  
+  TCNT0   = 0;                                           /* Reset counter.   */
+  TIFR0   = (1 << OCF0A);                                /* Reset pending.   */
+  TIMSK0  = (1 << OCIE0A);  
 }
 
 /** @} */

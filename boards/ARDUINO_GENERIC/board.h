@@ -22,14 +22,14 @@
 #define _BOARD_H_
 
 /*
- * Setup for the Arduino Mega board.
+ * Setup for the Arduino board.
  */
 
 /*
  * Board identifier.
  */
-#define BOARD_ARDUINO_MEGA
-#define BOARD_NAME "Arduino Mega"
+#define BOARD_ARDUINO_GENERIC
+#define BOARD_NAME "Arduino"
 
 /* All inputs with pull-ups */
 #define VAL_DDRA  0x00

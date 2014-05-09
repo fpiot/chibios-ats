@@ -64,7 +64,7 @@ OBJDIR = .
 
 # Imported source files
 CHIBIOS = ../..
-include $(CHIBIOS)/boards/ARDUINO_MEGA/board.mk
+include $(CHIBIOS)/boards/ARDUINO_GENERIC/board.mk
 include $(CHIBIOS)/os/hal/platforms/AVR/platform.mk
 include $(CHIBIOS)/os/hal/hal.mk
 include $(CHIBIOS)/os/ports/GCC/AVR/port.mk
