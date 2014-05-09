@@ -5,7 +5,7 @@
 %}
 
 %{
-BaseSequentialStream *c_SD1_p(void) {
+SerialDriver *c_SD1_p(void) {
 	return &SD1;
 }
 
@@ -23,11 +23,7 @@ static msg_t Thread1(void *arg) {
  * Application entry point.
  */
 void c_entry(void) {
-  /*
-   * Activates the serial driver 1 using the driver default configuration.
-   */
   palClearPad(IOPORT2, PORTB_LED1);
-  sdStart(&SD1, NULL);
 
   /*
    * Starts the LED blinker thread.
@@ -38,12 +34,14 @@ void c_entry(void) {
 
 #define THREAD_SLEEP_MS   i2u 1000
 
-typedef BaseSequentialStream_p = $extype"BaseSequentialStream *"
+typedef SerialDriver_p = $extype"SerialDriver *"
+typedef SerialConfig_p = $extype"SerialConfig *"
 
 extern fun halInit (): void = "mac#"
 extern fun chSysInit (): void = "mac#"
-extern fun c_SD1_p (): BaseSequentialStream_p = "mac#"
-extern fun TestThread (p: BaseSequentialStream_p): void = "mac#"
+extern fun sdStart (s: SerialDriver_p, c: ptr): void = "mac#"
+extern fun c_SD1_p (): SerialDriver_p = "mac#"
+extern fun TestThread (p: SerialDriver_p): void = "mac#"
 extern fun chThdSleepMilliseconds (ms: uint): void = "mac#"
 extern fun c_entry (): void = "mac#"
 
@@ -57,7 +55,9 @@ implement main0 () = begin
    *)
   halInit ();
   chSysInit ();
-  c_entry ();
+  (* Activates the serial driver 1 using the driver default configuration. *)
+  sdStart (SD1_p, the_null_ptr);
+  c_entry (); // xxx Should be snatched...
   TestThread (SD1_p);
   loopsleep ();
 end where {
