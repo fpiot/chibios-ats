@@ -5,6 +5,10 @@
 %}
 
 %{
+BaseSequentialStream *c_SD1_p(void) {
+	return &SD1;
+}
+
 static WORKING_AREA(waThread1, 32);
 static msg_t Thread1(void *arg) {
 
@@ -40,18 +44,23 @@ void c_entry(void) {
    * Starts the LED blinker thread.
    */
   chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
-
-  TestThread(&SD1);
 }
 %}
 
 #define THREAD_SLEEP_MS   i2u 1000
 
+typedef BaseSequentialStream_p = $extype"BaseSequentialStream *"
+
+extern fun c_SD1_p (): BaseSequentialStream_p = "mac#"
+extern fun TestThread (p: BaseSequentialStream_p): void = "mac#"
 extern fun chThdSleepMilliseconds (ms: uint): void = "mac#"
 extern fun c_entry (): void = "mac#"
 
 implement main0 () = begin
-  let fun loopsleep () = (chThdSleepMilliseconds THREAD_SLEEP_MS; loopsleep ())
-  in (c_entry (); loopsleep ())
-  end
-end
+  c_entry ();
+  TestThread (SD1_p);
+  loopsleep ();
+end where {
+  fun loopsleep () = (chThdSleepMilliseconds THREAD_SLEEP_MS; loopsleep ())
+  val SD1_p = c_SD1_p ()
+}
