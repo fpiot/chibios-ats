@@ -19,22 +19,12 @@ void c_toggle_led1(void) {
 
 static WORKING_AREA(waThread1, 32);
 static msg_t Thread1(void *arg) {
-
-  while (TRUE) {
-    palTogglePad(IOPORT2, PORTB_LED1);
-    chThdSleepMilliseconds(1000);
-  }
-  return 0;
+	return thread1_ats();
 }
 
-/*
- * Application entry point.
- */
 void c_entry(void) {
-  /*
-   * Starts the LED blinker thread.
-   */
-  chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
+	/* Starts the LED blinker thread. */
+	chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
 }
 %}
 
@@ -42,6 +32,7 @@ void c_entry(void) {
 
 typedef SerialDriver_p = $extype"SerialDriver *"
 typedef SerialConfig_p = $extype"SerialConfig *"
+typedef msg_t = $extype"msg_t"
 
 extern fun halInit (): void = "mac#"
 extern fun chSysInit (): void = "mac#"
@@ -52,6 +43,18 @@ extern fun c_SD1_p (): SerialDriver_p = "mac#"
 extern fun TestThread (p: SerialDriver_p): void = "mac#"
 extern fun chThdSleepMilliseconds (ms: uint): void = "mac#"
 extern fun c_entry (): void = "mac#"
+
+extern fun thread1 (arg: ptr): int = "ext#thread1_ats"
+implement thread1 (arg) = begin
+  loop ();
+  0;
+end where {
+  fun loop () = begin
+    c_toggle_led1 ();
+    chThdSleepMilliseconds THREAD_SLEEP_MS;
+    loop ();
+  end
+}
 
 implement main0 () = begin
   (*
@@ -68,11 +71,11 @@ implement main0 () = begin
   c_clear_led1 ();
   c_entry (); // xxx Should be snatched...
   TestThread SD1_p;
-  loopsleep ();
+  loop ();
 end where {
-  fun loopsleep () = begin
+  fun loop () = begin
     chThdSleepMilliseconds THREAD_SLEEP_MS;
-    loopsleep ();
+    loop ();
   end
   val SD1_p = c_SD1_p ()
 }
