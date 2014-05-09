@@ -28,19 +28,19 @@ void c_entry(void) {
 }
 %}
 
-#define THREAD_SLEEP_MS   i2u 1000
+#define THREAD_SLEEP_MS   1000U
 
-typedef SerialDriver_p = $extype"SerialDriver *"
-typedef SerialConfig_p = $extype"SerialConfig *"
+abst@ype SerialDriver = $extype"SerialDriver"
+abst@ype SerialConfig = $extype"SerialConfig"
 typedef msg_t = $extype"msg_t"
 
 extern fun halInit (): void = "mac#"
 extern fun chSysInit (): void = "mac#"
-extern fun sdStart (s: SerialDriver_p, c: ptr): void = "mac#"
+extern fun sdStart (s: cPtr0(SerialDriver), c: ptr): void = "mac#"
 extern fun c_toggle_led1 (): void = "mac#"
 extern fun c_clear_led1 (): void = "mac#"
-extern fun c_SD1_p (): SerialDriver_p = "mac#"
-extern fun TestThread (p: SerialDriver_p): void = "mac#"
+extern fun c_SD1_p (): cPtr0(SerialDriver) = "mac#"
+extern fun TestThread (p: cPtr0(SerialDriver)): void = "mac#"
 extern fun chThdSleepMilliseconds (ms: uint): void = "mac#"
 extern fun c_entry (): void = "mac#"
 
