@@ -1,3 +1,13 @@
 .dep/
 build/
 demos/*-ats/main.c
+*.o
+*.lst
+ch.bin
+ch.eep
+ch.elf
+ch.hex
+ch.lss
+ch.map
+ch.sym
+pats_ccomp_typedefs.h
