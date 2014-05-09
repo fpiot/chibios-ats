@@ -42,12 +42,16 @@ void c_entry(void) {
   chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
 
   TestThread(&SD1);
-  while(TRUE) {
-    chThdSleepMilliseconds(1000);
-  }
 }
 %}
 
+#define THREAD_SLEEP_MS   i2u 1000
+
+extern fun chThdSleepMilliseconds (ms: uint): void = "mac#"
 extern fun c_entry (): void = "mac#"
 
-implement main0 () = c_entry ()
+implement main0 () = begin
+  let fun loopsleep () = (chThdSleepMilliseconds THREAD_SLEEP_MS; loopsleep ())
+  in (c_entry (); loopsleep ())
+  end
+end
