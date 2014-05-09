@@ -1,5 +1,5 @@
-ATS programing on ChibiOS/RT
-============================
+ATS programing on [ChibiOS/RT](http://www.chibios.org)
+======================================================
 
 ## Hardwares
 
@@ -51,13 +51,13 @@ And run following commands.
 $ ls -l /dev/ttyACM0
 crw-rw---- 1 root dialout 166, 0 May  8 15:59 /dev/ttyACM0
 $ cd arduino-mega2560-ats/blink_ats
-$ make write
-avrdude -c stk500v2 -p atmega2560 -b 115200 -P /dev/ttyACM0 -U flash:w:main.hex
+$ make program
+avrdude -p atmega2560 -P /dev/ttyACM0     -c stk500v2    -b 115200 -U flash:w:ch.hex 
 avrdude: AVR device initialized and ready to accept instructions
-Reading | ################################################## | 100% 0.01s
+Reading | ################################################## | 100% 0.02s
 --snip--
 avrdude: verifying ...
-avrdude: 2850 bytes of flash verified
+avrdude: 28650 bytes of flash verified
 avrdude: safemode: Fuses OK (E:00, H:00, L:00)
 avrdude done.  Thank you.
 ```
