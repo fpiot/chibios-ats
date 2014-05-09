@@ -9,6 +9,14 @@ SerialDriver *c_SD1_p(void) {
 	return &SD1;
 }
 
+void c_clear_led1(void) {
+	palClearPad(IOPORT2, PORTB_LED1);
+}
+
+void c_toggle_led1(void) {
+	palTogglePad(IOPORT2, PORTB_LED1);
+}
+
 static WORKING_AREA(waThread1, 32);
 static msg_t Thread1(void *arg) {
 
@@ -23,8 +31,6 @@ static msg_t Thread1(void *arg) {
  * Application entry point.
  */
 void c_entry(void) {
-  palClearPad(IOPORT2, PORTB_LED1);
-
   /*
    * Starts the LED blinker thread.
    */
@@ -40,6 +46,8 @@ typedef SerialConfig_p = $extype"SerialConfig *"
 extern fun halInit (): void = "mac#"
 extern fun chSysInit (): void = "mac#"
 extern fun sdStart (s: SerialDriver_p, c: ptr): void = "mac#"
+extern fun c_toggle_led1 (): void = "mac#"
+extern fun c_clear_led1 (): void = "mac#"
 extern fun c_SD1_p (): SerialDriver_p = "mac#"
 extern fun TestThread (p: SerialDriver_p): void = "mac#"
 extern fun chThdSleepMilliseconds (ms: uint): void = "mac#"
@@ -57,10 +65,14 @@ implement main0 () = begin
   chSysInit ();
   (* Activates the serial driver 1 using the driver default configuration. *)
   sdStart (SD1_p, the_null_ptr);
+  c_clear_led1 ();
   c_entry (); // xxx Should be snatched...
-  TestThread (SD1_p);
+  TestThread SD1_p;
   loopsleep ();
 end where {
-  fun loopsleep () = (chThdSleepMilliseconds THREAD_SLEEP_MS; loopsleep ())
+  fun loopsleep () = begin
+    chThdSleepMilliseconds THREAD_SLEEP_MS;
+    loopsleep ();
+  end
   val SD1_p = c_SD1_p ()
 }
