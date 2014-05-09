@@ -1,3 +1,5 @@
+#include "share/atspre_staload.hats"
+
 %{^
 #include "ch.h"
 #include "hal.h"
@@ -5,10 +7,6 @@
 %}
 
 %{
-SerialDriver *c_SD1_p(void) {
-	return &SD1;
-}
-
 void c_clear_led1(void) {
 	palClearPad(IOPORT2, PORTB_LED1);
 }
@@ -26,18 +24,20 @@ void c_entry(void) {
 }
 %}
 
+staload UN = "prelude/SATS/unsafe.sats"
+
 #define THREAD_SLEEP_MS   1000U
 
 abst@ype SerialDriver = $extype"SerialDriver"
 abst@ype SerialConfig = $extype"SerialConfig"
 typedef msg_t = $extype"msg_t"
+macdef SD1_PTR  = $extval(cPtr0(SerialDriver), "(&SD1)")
 
 extern fun halInit (): void = "mac#"
 extern fun chSysInit (): void = "mac#"
 extern fun sdStart (s: cPtr0(SerialDriver), c: ptr): void = "mac#"
 extern fun c_toggle_led1 (): void = "mac#"
 extern fun c_clear_led1 (): void = "mac#"
-extern fun c_SD1_p (): cPtr0(SerialDriver) = "mac#"
 extern fun TestThread (p: cPtr0(SerialDriver)): void = "mac#"
 extern fun chThdSleepMilliseconds (ms: uint): void = "mac#"
 extern fun c_entry (): void = "mac#"
@@ -65,15 +65,14 @@ implement main0 () = begin
   halInit ();
   chSysInit ();
   (* Activates the serial driver 1 using the driver default configuration. *)
-  sdStart (SD1_p, the_null_ptr);
+  sdStart (SD1_PTR, the_null_ptr);
   c_clear_led1 ();
   c_entry (); // xxx Should be snatched...
-  TestThread SD1_p;
+  TestThread SD1_PTR;
   loop ();
 end where {
   fun loop () = begin
     chThdSleepMilliseconds THREAD_SLEEP_MS;
     loop ();
   end
-  val SD1_p = c_SD1_p ()
 }
