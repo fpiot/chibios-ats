@@ -23,17 +23,6 @@ static msg_t Thread1(void *arg) {
  * Application entry point.
  */
 void c_entry(void) {
-
-  /*
-   * System initializations.
-   * - HAL initialization, this also initializes the configured device drivers
-   *   and performs the board-specific initializations.
-   * - Kernel initialization, the main() function becomes a thread and the
-   *   RTOS is active.
-   */
-  halInit();
-  chSysInit();
-
   /*
    * Activates the serial driver 1 using the driver default configuration.
    */
@@ -51,12 +40,23 @@ void c_entry(void) {
 
 typedef BaseSequentialStream_p = $extype"BaseSequentialStream *"
 
+extern fun halInit (): void = "mac#"
+extern fun chSysInit (): void = "mac#"
 extern fun c_SD1_p (): BaseSequentialStream_p = "mac#"
 extern fun TestThread (p: BaseSequentialStream_p): void = "mac#"
 extern fun chThdSleepMilliseconds (ms: uint): void = "mac#"
 extern fun c_entry (): void = "mac#"
 
 implement main0 () = begin
+  (*
+   * System initializations.
+   * - HAL initialization, this also initializes the configured device drivers
+   *   and performs the board-specific initializations.
+   * - Kernel initialization, the main() function becomes a thread and the
+   *   RTOS is active.
+   *)
+  halInit ();
+  chSysInit ();
   c_entry ();
   TestThread (SD1_p);
   loopsleep ();
