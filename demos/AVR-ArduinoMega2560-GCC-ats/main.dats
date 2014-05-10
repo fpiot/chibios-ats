@@ -32,7 +32,7 @@ extern fun halInit: () -> void = "mac#"
 extern fun chSysInit: () -> void = "mac#"
 extern fun sdStart: (cPtr0(SerialDriver), ptr) -> void = "mac#"
 extern fun chThdCreateStatic: (ptr, size_t, tprio_t, tfunc_t, ptr) -> cPtr0(Thread) = "mac#"
-extern fun chThdSleepMilliseconds: (uint) -> void = "mac#"
+extern fun chThdSleepMilliseconds: {p:pos} (uint p) -> void = "mac#"
 extern fun TestThread: (cPtr0(SerialDriver)) -> void = "mac#"
 
 extern fun thread1: tfunc_t
