@@ -7,14 +7,6 @@
 %}
 
 %{
-void c_clear_led1(void) {
-	palClearPad(IOPORT2, PORTB_LED1);
-}
-
-void c_toggle_led1(void) {
-	palTogglePad(IOPORT2, PORTB_LED1);
-}
-
 static WORKING_AREA(waThread1, 32);
 
 msg_t thread1_ats(void *);
@@ -27,17 +19,18 @@ void c_entry(void) {
 staload UN = "prelude/SATS/unsafe.sats"
 
 #define THREAD_SLEEP_MS   1000U
+#define PORTB_LEDON       int2char0 0xff
+#define PORTB_LEDOFF      int2char0 0x00
 
 abst@ype SerialDriver = $extype"SerialDriver"
 abst@ype SerialConfig = $extype"SerialConfig"
 typedef msg_t = $extype"msg_t"
 macdef SD1_PTR  = $extval(cPtr0(SerialDriver), "(&SD1)")
+macdef PORTB_PTR = $extval(ptr, "(0x05 + 0x20)")         (* Only for Arduino Mega 2560 *)
 
 extern fun halInit (): void = "mac#"
 extern fun chSysInit (): void = "mac#"
 extern fun sdStart (s: cPtr0(SerialDriver), c: ptr): void = "mac#"
-extern fun c_toggle_led1 (): void = "mac#"
-extern fun c_clear_led1 (): void = "mac#"
 extern fun TestThread (p: cPtr0(SerialDriver)): void = "mac#"
 extern fun chThdSleepMilliseconds (ms: uint): void = "mac#"
 extern fun c_entry (): void = "mac#"
@@ -45,7 +38,9 @@ extern fun c_entry (): void = "mac#"
 extern fun thread1 (arg: ptr): int = "ext#thread1_ats"
 implement thread1 (arg) = 0 where {
   fun loop () = {
-    val () = c_toggle_led1 ()
+    val () = $UN.ptr0_set<char> (PORTB_PTR, PORTB_LEDON)
+    val () = chThdSleepMilliseconds THREAD_SLEEP_MS
+    val () = $UN.ptr0_set<char> (PORTB_PTR, PORTB_LEDOFF)
     val () = chThdSleepMilliseconds THREAD_SLEEP_MS
     val () = loop ()
   }
@@ -68,7 +63,6 @@ implement main0 () = {
   val () = chSysInit ()
   (* Activates the serial driver 1 using the driver default configuration. *)
   val () = sdStart (SD1_PTR, the_null_ptr)
-  val () = c_clear_led1 ()
   val () = c_entry () // xxx Should be snatched...
   val () = TestThread SD1_PTR
   val () = loop ()
