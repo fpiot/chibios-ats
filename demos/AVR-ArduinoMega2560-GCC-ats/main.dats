@@ -28,15 +28,14 @@ macdef waThread1_SIZE = $extval(size_t, "sizeof(waThread1)")
 macdef NORMALPRIO     = $extval(tprio_t, "NORMALPRIO")
 macdef PORTB_PTR      = $extval(ptr, "(0x05 + 0x20)")   (* Only for Arduino Mega 2560 *)
 
-extern fun halInit (): void = "mac#"
-extern fun chSysInit (): void = "mac#"
-extern fun sdStart (s: cPtr0(SerialDriver), c: ptr): void = "mac#"
-extern fun chThdCreateStatic (wsp: ptr, size: size_t, prio: tprio_t, pf: tfunc_t, arg: ptr):
-                              cPtr0(Thread) = "mac#"
-extern fun TestThread (p: cPtr0(SerialDriver)): void = "mac#"
-extern fun chThdSleepMilliseconds (ms: uint): void = "mac#"
+extern fun halInit: () -> void = "mac#"
+extern fun chSysInit: () -> void = "mac#"
+extern fun sdStart: (cPtr0(SerialDriver), ptr) -> void = "mac#"
+extern fun chThdCreateStatic: (ptr, size_t, tprio_t, tfunc_t, ptr) -> cPtr0(Thread) = "mac#"
+extern fun chThdSleepMilliseconds: (uint) -> void = "mac#"
+extern fun TestThread: (cPtr0(SerialDriver)) -> void = "mac#"
 
-extern fun thread1: tfunc_t = "ext#thread1_ats"
+extern fun thread1: tfunc_t
 implement thread1 (arg) = 0 where {
   fun loop () = {
     val () = $UN.ptr0_set<char> (PORTB_PTR, PORTB_LEDON)
