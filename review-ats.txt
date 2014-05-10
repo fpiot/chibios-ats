@@ -1,0 +1,198 @@
+# Code review by ATS community
+
+https://groups.google.com/forum/#!topic/ats-lang-users/FJ2FE53cSNw
+
+
+## Hongwei
+
+First, some minor issues:
+
+you can write 1000u or 1000U for i2u(1000).
+
+Also, I suggest
+
+abst@ype SerialDriver = $extype"SerialDriver"
+
+Then SerialDriver_p can be replaced with cPtr1(SerialDriver) (or cPtr0(SerialDriver)).
+
+
+## Hongwei
+
+I also suggest the following style of sequencing:
+
+val () = do_this (...)
+val () = do_that (...)
+
+This style will make it very easy to add proofs into your code.
+
+By the way, people often criticize the syntax of ATS for being verbose.
+But in this case, the above style of sequencing is a lot more flexible than
+the following very restricted form:
+
+do_this (...); do_that (...);
+
+For instance, we can later add proofs as follows:
+
+val (pf | ()) = do_this (...)
+val ((*void*)) = do_that (pf | ...)
+
+
+## Hongwei
+
+When I see the following code:
+
+do_this(...); do_that(...);
+
+My first question is always: Why can't we write
+
+do_that(...); do_this(...);
+
+To many people, this sounds like a "stupid" question. But if you think
+about it, this is actually a very profound question.
+
+In Ocaml, this question is ignored. In other words, this question
+can only be answered externally.
+
+In Haskell, monads are introduced to support sequencing.
+
+In ATS, you can think that the following code:
+
+do_this (...); do_that (...);
+
+is actually the erasure of
+
+
+val (pf | ()) = do_this (...)
+val ((*void*)) = do_that (pf | ...)
+
+Clearly, we cannot call 'do_that' first because 'do_that'
+needs a proof returned by a call to 'do_this'. This explains why,
+sometimes, sequencing order, is significant (and, sometimes, it
+is insignificant).
+
+
+## John Skaller
+
+On 10/05/2014, at 3:04 AM, gmhwxi wrote:
+>
+> is actually the erasure of
+>
+> val (pf | ()) = do_this (...)
+> val ((*void*)) = do_that (pf | ...)
+>
+> Clearly, we cannot call 'do_that' first because 'do_that'
+> needs a proof returned by a call to 'do_this'. This explains why,
+> sometimes, sequencing order, is significant (and, sometimes, it
+> is insignificant).
+
+And when it is insignificant and we can evaluate in parallel,
+how is that indicated? 
+
+
+## Hongwei
+
+In ATS, a pure function can write but it can only write
+to the memory it owns. The design in ATS goes like this:
+
+If I want to indicate to the compiler that that do_this and do_that
+can be evaluated in parallel, I use the following syntax:
+
+prval (pf1, pf2) = ... // [pf1] and [pf2] are separated
+val ... = do_this (pf1 | ...) // do_this is checked to be pure
+and ... = do_that (pf2 | ...) // do_that is checked to be pure
+
+Basically, the requirement is that (1) do_this and do_that can
+only manipulate resources they own and (2) they do not share
+any resources between them.
+
+
+## John Skaller
+
+Ah yes of course, this is the standard ML notation.
+I wonder, however, if you can also do this:
+
+        val (), () = f1 a1, f2 a2
+
+[omitting proofs]
+
+BTW: it isn't necessary that two procedures not modify shared
+memory to use them in parallel. A simple example, they both
+do atomic increments on a shared variable. Clearly the procedures
+aren't pure, in fact no procedures can possibly be pure or they
+would be worthless.
+
+If you consider two processes modifying separate files,
+clearly each has side effects, and it looks like these procedures
+are independent. But this is NOT the case in the larger picture,
+they're both modifying files in a single file system.
+
+So the separation requirement is a fallacy: in its simple form
+it is worthless. Clearly the real requirement is that some
+invariant be satisfied "at some time in the future".
+
+So actually I'd expect some form like:
+
+        prval (psync) = .. with
+                prval (pf1, pf2) =
+                ..
+
+where the psync is the synchronisation proof, and the individual proofs
+pf1 and pf2 may take the synchronisation proof's conclusion as a premise.
+[Or did I get this backwards .. lets see]
+
+Roughly, if f1 and f2 each add 1 to a shared variable, then provided
+addition is atomic, we can deduce that after both f1 and f2 have completed
+the variable will be two greater.
+
+But basically my point is: for functions purity or whatever may be useful
+because the *system* manages the assignment of their result values
+in some fixed specified way. Technically these are procedures with
+side effects, and in general, procedures ALWAYS have side effects
+because they don't return values and would be useless if they
+didn't have side effects.
+
+So functions are really procedures with system specified
+side effects and a system invariant. Its a special case. 
+
+
+## Hongwei
+
+Whether a function is pure or not depends on the
+underlying (abstract) model for computation. At the
+machine-level, computation cannot be pure. For instance,
+evaluation of pure functions in Haskell certainly generates
+a lot of effects at run-time.
+
+I have repeatedly read arguments by ML people claiming that
+Haskell functions are not really pure. But these arguments
+do not make much sense; whether a Haskell function is pure or
+not should be judged in the Haskell's model for computation (
+assuming that the model can be correctly implemented at machine-level
+).
+
+In ATS, pure functions can acquire locks and can atomically
+increment a shared variable. The programmer has the ultimate
+say as to whether an operation is pure or not. We have to have
+such kind of flexibility to support practical programming.
+
+
+>>If you consider two processes modifying separate files,
+>>clearly each has side effects, and it looks like these procedures
+>>are independent. But this is NOT the case in the larger picture,
+>>they're both modifying files in a single file system.
+
+Maybe the notion of file system does not exist in my model for
+computation. It is entirely possible that files will have different
+time stamps based on different evaluation order, but this may not
+be part of the model used to judge the purity of the two processes.
+
+
+>>But basically my point is: for functions purity or whatever may be useful
+>>because the *system* manages the assignment of their result values
+>>in some fixed specified way. Technically these are procedures with
+>>side effects, and in general, procedures ALWAYS have side effects
+>>because they don't return values and would be useless if they
+>>didn't have side effects.
+
+Yes, if you talk about purity at machine-level. Only proof functions
+are pure at that level :)
