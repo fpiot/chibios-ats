@@ -8,12 +8,6 @@
 
 %{
 static WORKING_AREA(waThread1, 32);
-
-msg_t thread1_ats(void *);
-void c_entry(void) {
-	/* Starts the LED blinker thread. */
-	chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, thread1_ats, NULL);
-}
 %}
 
 staload UN = "prelude/SATS/unsafe.sats"
@@ -24,18 +18,25 @@ staload UN = "prelude/SATS/unsafe.sats"
 
 abst@ype SerialDriver = $extype"SerialDriver"
 abst@ype SerialConfig = $extype"SerialConfig"
-typedef msg_t = $extype"msg_t"
-macdef SD1_PTR  = $extval(cPtr0(SerialDriver), "(&SD1)")
-macdef PORTB_PTR = $extval(ptr, "(0x05 + 0x20)")         (* Only for Arduino Mega 2560 *)
+abst@ype Thread       = $extype"Thread"
+abst@ype tprio_t      = uint
+typedef msg_t         = int
+typedef tfunc_t       = (ptr) -> msg_t
+macdef SD1_PTR        = $extval(cPtr0(SerialDriver), "(&SD1)")
+macdef waThread1_PTR  = $extval(ptr, "waThread1")
+macdef waThread1_SIZE = $extval(size_t, "sizeof(waThread1)")
+macdef NORMALPRIO     = $extval(tprio_t, "NORMALPRIO")
+macdef PORTB_PTR      = $extval(ptr, "(0x05 + 0x20)")   (* Only for Arduino Mega 2560 *)
 
 extern fun halInit (): void = "mac#"
 extern fun chSysInit (): void = "mac#"
 extern fun sdStart (s: cPtr0(SerialDriver), c: ptr): void = "mac#"
+extern fun chThdCreateStatic (wsp: ptr, size: size_t, prio: tprio_t, pf: tfunc_t, arg: ptr):
+                              cPtr0(Thread) = "mac#"
 extern fun TestThread (p: cPtr0(SerialDriver)): void = "mac#"
 extern fun chThdSleepMilliseconds (ms: uint): void = "mac#"
-extern fun c_entry (): void = "mac#"
 
-extern fun thread1 (arg: ptr): int = "ext#thread1_ats"
+extern fun thread1: tfunc_t = "ext#thread1_ats"
 implement thread1 (arg) = 0 where {
   fun loop () = {
     val () = $UN.ptr0_set<char> (PORTB_PTR, PORTB_LEDON)
@@ -63,7 +64,8 @@ implement main0 () = {
   val () = chSysInit ()
   (* Activates the serial driver 1 using the driver default configuration. *)
   val () = sdStart (SD1_PTR, the_null_ptr)
-  val () = c_entry () // xxx Should be snatched...
+  (* Starts the LED blinker thread. *)
+  val tp = chThdCreateStatic (waThread1_PTR, waThread1_SIZE, NORMALPRIO, thread1, the_null_ptr)
   val () = TestThread SD1_PTR
   val () = loop ()
 }
