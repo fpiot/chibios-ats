@@ -171,7 +171,7 @@ CFLAGS += $(CSTANDARD)
 # ATS
 ATS       = patsopt
 CFLAGS += -Wno-unused-label -Wno-unused-but-set-variable -Wno-implicit-function-declaration -Wno-unused-parameter -Wno-char-subscripts
-CFLAGS += -D_XOPEN_SOURCE  -I. -I${PATSHOME} -I${PATSHOME}/ccomp/runtime
+CFLAGS += -D_XOPEN_SOURCE -D_ATSTYPE_VAR_SIZE=0X00FF -I. -I${PATSHOME} -I${PATSHOME}/ccomp/runtime
 
 
 #---------------- Compiler Options C++ ----------------
