@@ -1,5 +1,4 @@
-ATS programing on [ChibiOS/RT](http://www.chibios.org)
-======================================================
+# ATS programing on [ChibiOS/RT](http://www.chibios.org) [![Build Status](https://travis-ci.org/fpiot/chibios-ats.svg)](https://travis-ci.org/fpiot/chibios-ats)
 
 ## Hardwares
 
