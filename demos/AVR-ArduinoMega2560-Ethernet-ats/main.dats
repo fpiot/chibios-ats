@@ -32,7 +32,6 @@ extern fun chSysInit: () -> void = "mac#"
 extern fun sdStart: (cPtr0(SerialDriver), ptr) -> void = "mac#"
 extern fun chThdCreateStatic: (ptr, size_t, tprio_t, tfunc_t, ptr) -> cPtr0(Thread) = "mac#"
 extern fun chThdSleepMilliseconds: {p:pos} (uint p) -> void = "mac#"
-extern fun TestThread: (cPtr0(SerialDriver)) -> void = "mac#"
 
 extern fun thread1: tfunc_t
 implement thread1 (arg) = 0 where {
@@ -64,6 +63,5 @@ implement main0 () = {
   val () = sdStart (SD1_PTR, the_null_ptr)
   (* Starts the LED blinker thread. *)
   val tp = chThdCreateStatic (waThread1_PTR, waThread1_SIZE, NORMALPRIO, thread1, the_null_ptr)
-  val () = TestThread SD1_PTR
   val () = loop ()
 }

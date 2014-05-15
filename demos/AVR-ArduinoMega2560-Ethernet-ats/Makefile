@@ -75,7 +75,6 @@ include $(CHIBIOS)/test/test.mk
 # List C source files here. (C dependencies are automatically generated.)
 SRC = $(PORTSRC) \
       $(KERNSRC) \
-      $(TESTSRC) \
       $(HALSRC) \
       $(PLATFORMSRC) \
       $(BOARDSRC) \
