@@ -169,9 +169,10 @@ CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 CFLAGS += $(CSTANDARD)
 
 # ATS
-ATS       = patsopt
+ATS              = patsopt
+ATSTYPE_VAR_SIZE = 0X000F
 CFLAGS += -Wno-unused-label -Wno-unused-but-set-variable -Wno-implicit-function-declaration -Wno-unused-parameter -Wno-char-subscripts
-CFLAGS += -D_XOPEN_SOURCE -D_ATSTYPE_VAR_SIZE=0X00FF -I. -I${PATSHOME} -I${PATSHOME}/ccomp/runtime
+CFLAGS += -D_XOPEN_SOURCE -D_ATSTYPE_VAR_SIZE=${ATSTYPE_VAR_SIZE} -I. -I${PATSHOME} -I${PATSHOME}/ccomp/runtime
 
 
 #---------------- Compiler Options C++ ----------------
@@ -637,7 +638,7 @@ build elf hex bin eep lss sym coff extcoff \
 clean clean_list program debug gdb-config
 
 pats_ccomp_typedefs.h:
-	sed -e 's/_\[0XFFFF\]/_\[0X00FF\]/g' ${PATSHOME}/ccomp/runtime/$@ > $@
+	sed -e 's/_\[0XFFFF\]/_\[${ATSTYPE_VAR_SIZE}\]/g' ${PATSHOME}/ccomp/runtime/$@ > $@
 
 main.c: main.dats pats_ccomp_typedefs.h
 	$(ATS) -o $@ -d $<
