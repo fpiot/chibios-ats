@@ -79,7 +79,8 @@ SRC = $(PORTSRC) \
       $(PLATFORMSRC) \
       $(BOARDSRC) \
       $(CHIBIOS)/os/various/evtimer.c \
-      main.c
+      ethernet_dats.c \
+      main_dats.c
 
 
 # List C++ source files here. (C dependencies are automatically generated.)
@@ -620,7 +621,7 @@ clean_list :
 	$(REMOVE) $(SRC:.c=.i)
 	$(REMOVEDIR) .dep
 	$(REMOVE) pats_ccomp_typedefs.h
-	$(REMOVE) main.c
+	$(REMOVE) *ats.c
 
 
 # Create object files directory
@@ -639,5 +640,5 @@ clean clean_list program debug gdb-config
 pats_ccomp_typedefs.h:
 	sed -e 's/_\[0XFFFF\]/_\[${ATSTYPE_VAR_SIZE}\]/g' ${PATSHOME}/ccomp/runtime/$@ > $@
 
-main.c: main.dats pats_ccomp_typedefs.h
+%_dats.c: %.dats pats_ccomp_typedefs.h
 	$(ATS) -o $@ -d $<

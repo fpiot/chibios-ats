@@ -10,6 +10,8 @@ static WORKING_AREA(waThread1, 32);
 %}
 
 staload UN = "prelude/SATS/unsafe.sats"
+staload "./ethernet.sats"
+dynload "./ethernet.dats"
 
 #define THREAD_SLEEP_MS   1000U
 #define PORTB_LEDON       int2char0 0xff
@@ -62,6 +64,7 @@ implement main0 () = {
   (* Activates the serial driver 1 using the driver default configuration. *)
   val () = sdStart (SD1_PTR, the_null_ptr)
   (* Starts the LED blinker thread. *)
-  val tp = chThdCreateStatic (waThread1_PTR, waThread1_SIZE, NORMALPRIO, thread1, the_null_ptr)
+  val _ = chThdCreateStatic (waThread1_PTR, waThread1_SIZE, NORMALPRIO, thread1, the_null_ptr)
+  val _ = return_int ()
   val () = loop ()
 }
